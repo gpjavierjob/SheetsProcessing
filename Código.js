@@ -1,4 +1,4 @@
-// Parámetros de control de tiempo de ejecución
+// // Parámetros de control de tiempo de ejecución
 const MILISECONDS_FOR_ONE_MINUTE = 60000;
 const GOOGLE_SCRIPTS_MAX_RUNTIME = 6 * MILISECONDS_FOR_ONE_MINUTE // 6 minutos
 
@@ -9,7 +9,7 @@ const REPAIR_THRESHOLD = 15 * MILISECONDS_FOR_ONE_MINUTE; // 15 minutos
 const SLEEP_TIME = 2000; // 2 segundos
 const ABORTING_EXECUTION_MESSAGE = "El tiempo de ejecución máximo está a punto de alcanzarse. Abortando la operación.";
 
-// Parámetros de procesamiento de archivos
+// // Parámetros de procesamiento de archivos
 const LOG_TITLES = ['Fecha', 'Archivo', 'Filas', 'Estado'];
 const LOG_FILENAME_COL = 1;
 const LOG_STATE_COL = 3;
@@ -311,7 +311,7 @@ function processFolderFilesAndCopyTo(
       });
     } catch (error) {
       if (error.message === ABORTING_EXECUTION_MESSAGE) {
-        console.warn(abortError.message);
+        console.warn(error.message);
       } else {
         throw error;
       }

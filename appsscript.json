@@ -12,6 +12,12 @@
     ],
     "libraries": [
       {
+        "userSymbol": "EC",
+        "libraryId": "1Nvc5kBfs5qiAPmKnpsLn8e_qFj_RT7nHh6ybac36nNyrKRdhBVxiMid6",
+        "version": "0",
+        "developmentMode": true
+      },
+      {
         "userSymbol": "Utils",
         "version": "0",
         "libraryId": "1g-QX48sBM8_GEfyYdwf1HmQQixRXgX6HgiYMFZSI5KDweaJiMMAAXGIR",
