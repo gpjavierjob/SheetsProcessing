@@ -22,13 +22,6 @@ var SheetsProcessing = (function () {
   const ALLOWED_MIME_TYPES = [MimeType.MICROSOFT_EXCEL, MimeType.CSV, MimeType.GOOGLE_SHEETS];
   const ALLOWED_COLUMN_TYPES = ['string', 'float', 'integer', 'boolean', 'date'];
 
-  function isPlainObject(value) {
-    if (value === null || typeof value !== 'object') return false;
-    
-    const proto = Object.getPrototypeOf(value);
-    return proto === null || proto === Object.prototype;
-  }
-
   /**
    * Función de procesamiento general.
    *
@@ -111,7 +104,7 @@ var SheetsProcessing = (function () {
    * @throws {Error} Si la configuración no es válida
    */
   function validateProcessingConfig(config) {
-    if (!isPlainObject(config)) {
+    if (!Utils.isPlainObject(config)) {
       throw new Error("La configuración debe ser un objeto válido.");
     }
   

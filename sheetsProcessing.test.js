@@ -1,4 +1,4 @@
-function test_SheetsProcessing() {
+function _runSheetsProcessingTests() {
   const lib = SheetsProcessing._test;
 
   //----------------------------------------------
@@ -12,12 +12,11 @@ function test_SheetsProcessing() {
     const ALLOWED_MIME_TYPES = [MimeType.MICROSOFT_EXCEL, MimeType.CSV, MimeType.GOOGLE_SHEETS];
 
     Utils.it("no lanza error para MIME types válidos", () => {
-      // Testear todos los MIME types permitidos
       ALLOWED_MIME_TYPES.forEach(mimeType => {
         Utils.assertFunctionParams(
           lib.validateMimeType,
           [mimeType],
-          false, // No debería lanzar error
+          false, 
           `MIME type ${mimeType} debería ser válido`
         );
       });
@@ -43,7 +42,7 @@ function test_SheetsProcessing() {
         Utils.assertFunctionParams(
           lib.validateMimeType,
           [mimeType],
-          true, // Debería lanzar error
+          true, 
           `El valor de MimeType: ${mimeType} no es válido.`
         );
       });
@@ -117,7 +116,6 @@ function test_SheetsProcessing() {
     });
 
     Utils.it("es case sensitive si ALLOWED_MIME_TYPES lo es", () => {
-      // Este test depende de si tu implementación es case sensitive
       const upperCaseMimeType = "TEXT/CSV";
       const mixedCaseMimeType = "Application/Vnd.Google-Apps.Spreadsheet";
       
@@ -143,15 +141,13 @@ function test_SheetsProcessing() {
       Utils.assertFunctionParams(
         lib.validateMimeType,
         [mimeTypeWithParams],
-        true, // Probablemente inválido ya que no está en la lista allowlist
+        true, 
         `El valor de MimeType: ${mimeTypeWithParams} no es válido`
       );
     });
   });
 
-  // Tests adicionales para verificar la lista de MIME types permitidos
-
- //----------------------------------------------
+  //----------------------------------------------
   //
   // Tests para validateProcessingConfig
   //
@@ -176,7 +172,7 @@ function test_SheetsProcessing() {
       Utils.assertFunctionParams(
         lib.validateProcessingConfig,
         [validConfig],
-        false, // No debería lanzar error
+        false, 
         "Configuración válida no debería lanzar error"
       );
     });
@@ -188,7 +184,7 @@ function test_SheetsProcessing() {
       Utils.assertFunctionParams(
         lib.validateProcessingConfig,
         [configWithoutSearchingFn],
-        true, // Debería lanzar error
+        true, 
         "Debe proporcionar una función para obtener los archivos a procesar"
       );
     });
@@ -251,10 +247,9 @@ function test_SheetsProcessing() {
     Utils.it("no valida otras propiedades cuando searchingFn es válido", () => {
       const configWithInvalidColumns = {
         ...createValidConfig(),
-        columns: "invalid" // columns debería ser array, pero no se valida
+        columns: "invalid" 
       };
 
-      // No debería lanzar error porque solo valida searchingFn
       Utils.assertFunctionParams(
         lib.validateProcessingConfig,
         [configWithInvalidColumns],
@@ -295,7 +290,7 @@ function test_SheetsProcessing() {
       );
     });
 
-    Utils.it("lanza error para config no objeto", () => {
+    Utils.it("lanza error para config no objeto plano", () => {
       class ConfigClass {
         constructor() {
           this.searchingFn = function() {};
@@ -310,10 +305,10 @@ function test_SheetsProcessing() {
         false,
         function() {},
         [],
-        // new Map(),
+        new Map(),
         new Date(),
         /test/,
-        // new ConfigClass(),
+        new ConfigClass(),
       ];
 
       nonObjectValues.forEach(value => {
@@ -350,7 +345,6 @@ function test_SheetsProcessing() {
     });
 
     Utils.it("maneja funciones que devuelven diferentes tipos", () => {
-      // La validación solo chequea que sea función, no lo que devuelve
       const functionsWithDifferentReturns = [
         function() { return []; },
         function() { return null; },
@@ -374,11 +368,9 @@ function test_SheetsProcessing() {
     });
   });
 
-  // Tests adicionales para comportamiento edge
   Utils.describe("validateProcessingConfig - Edge Cases", () => {
 
     Utils.it("rechaza objetos que tienen searchingFn como propiedad heredada", () => {
-      // Crear objeto con searchingFn en el prototipo
       function ConfigWithInheritedFn() {}
       ConfigWithInheritedFn.prototype.searchingFn = function() { return []; };
       
@@ -394,16 +386,15 @@ function test_SheetsProcessing() {
     });
 
     Utils.it("rechaza objetos que tienen toString como searchingFn", () => {
-      // Objeto malicioso que tiene una función llamada searchingFn
       const trickyObject = {
         searchingFn: "I'm not a function, I'm a string!",
-        toString: function() { return []; } // Esto no debería engañar a la validación
+        toString: function() { return []; } 
       };
       
       Utils.assertFunctionParams(
         lib.validateProcessingConfig,
         [trickyObject],
-        true, // Debería fallar porque searchingFn es string, no función
+        true,
         "Debe proporcionar una función para obtener los archivos a procesar"
       );
     });
@@ -431,12 +422,10 @@ function test_SheetsProcessing() {
 
   Utils.describe("normalizeProcessingConfig", () => {
     
-    // Constantes de configuración por defecto (deben coincidir con las usadas en tu código)
     const UPDATE_EXISTING_ROWS = false;
     const IGNORE_EMPTY_ROWS = true;
     const ALLOW_FILE_REPROCESSING = false;
 
-    // Configuración de ejemplo para tests
     const sampleConfig = {
       columns: [0, 1, 2],
       searchingFn: function() { return []; },
@@ -511,8 +500,8 @@ function test_SheetsProcessing() {
       
       Utils.assertEquals(result.columns, [3, 4]);
       Utils.assertEquals(result.updateExistingRows, true);
-      Utils.assertEquals(result.ignoreEmptyRows, IGNORE_EMPTY_ROWS); // valor por defecto
-      Utils.assertEquals(result.allowFileReprocessing, ALLOW_FILE_REPROCESSING); // valor por defecto
+      Utils.assertEquals(result.ignoreEmptyRows, IGNORE_EMPTY_ROWS);
+      Utils.assertEquals(result.allowFileReprocessing, ALLOW_FILE_REPROCESSING); 
       Utils.assertEquals(result.sourceSheetName, undefined);
       Utils.assertEquals(result.processingFn, undefined);
       Utils.assertEquals(result.searchingFn, undefined);
@@ -605,7 +594,6 @@ function test_SheetsProcessing() {
       const originalConfig = { columns: [1, 2, 3] };
       const result = lib.normalizeProcessingConfig(originalConfig);
       
-      // Verificar que son objetos diferentes
       Utils.assertFalse(result === originalConfig);
       
       // Modificar el resultado no debería afectar el original
@@ -640,7 +628,6 @@ function test_SheetsProcessing() {
     });
   });
 
-  // Tests para casos edge específicos
   Utils.describe("normalizeProcessingConfig - Edge Cases", () => {
     
     const UPDATE_EXISTING_ROWS = false;
@@ -648,11 +635,9 @@ function test_SheetsProcessing() {
     const ALLOW_FILE_REPROCESSING = false;
 
     Utils.it("maneja propiedades con valores por defecto personalizados", () => {
-      // Si en algún momento cambian los valores por defecto, estos tests se ajustarían
       const emptyConfig = {};
       const result = lib.normalizeProcessingConfig(emptyConfig);
       
-      // Estos asserts verifican que los valores por defecto sean los esperados
       Utils.assertEquals(result.updateExistingRows, UPDATE_EXISTING_ROWS);
       Utils.assertEquals(result.ignoreEmptyRows, IGNORE_EMPTY_ROWS);
       Utils.assertEquals(result.allowFileReprocessing, ALLOW_FILE_REPROCESSING);
@@ -666,9 +651,8 @@ function test_SheetsProcessing() {
 
       const result = lib.normalizeProcessingConfig(configWithNulls);
       
-      // Para propiedades que no tienen valor por defecto específico para null
-      Utils.assertEquals(result.columns, []); // columns usa || [] así que null se convierte a []
-      Utils.assertEquals(result.sortCriteria, null); // sortCriteria usa ?. así que mantiene null
+      Utils.assertEquals(result.columns, []); 
+      Utils.assertEquals(result.sortCriteria, null); 
     });
 
     Utils.it("mantiene referencias a objetos complejos", () => {
@@ -681,7 +665,7 @@ function test_SheetsProcessing() {
       const result = lib.normalizeProcessingConfig(configWithComplex);
       
       Utils.assertEquals(result.sortCriteria, complexObject);
-      Utils.assertTrue(result.sortCriteria === complexObject); // Misma referencia
+      Utils.assertTrue(result.sortCriteria === complexObject); 
     });
   });
 
@@ -727,9 +711,8 @@ function test_SheetsProcessing() {
       Utils.assertTrue("text/csv" in result);
       Utils.assertTrue(result["text/csv"].hasOwnProperty("columns"));
       Utils.assertTrue(result["text/csv"].hasOwnProperty("searchingFn"));
-      // Verificar que se aplicaron valores por defecto
-      Utils.assertEquals(result["text/csv"].ignoreEmptyRows, true); // Valor por defecto
-      Utils.assertEquals(result["text/csv"].updateExistingRows, false); // Valor por defecto
+      Utils.assertEquals(result["text/csv"].ignoreEmptyRows, true); 
+      Utils.assertEquals(result["text/csv"].updateExistingRows, false); 
     });
 
     Utils.it("normaliza configMap con múltiples entradas", () => {
@@ -746,7 +729,6 @@ function test_SheetsProcessing() {
       Utils.assertTrue("application/vnd.google-apps.spreadsheet" in result);
       Utils.assertTrue("application/vnd.ms-excel" in result);
       
-      // Verificar que todas las configuraciones fueron normalizadas
       Object.values(result).forEach(config => {
         Utils.assertTrue(config.hasOwnProperty("ignoreEmptyRows"));
         Utils.assertTrue(config.hasOwnProperty("updateExistingRows"));
@@ -774,7 +756,7 @@ function test_SheetsProcessing() {
 
     Utils.it("aplica valores por defecto a configuraciones parciales", () => {
       const partialConfig = {
-        columns: [0, 1] // Solo columns definido
+        columns: [0, 1] 
         // searchingFn y otros no definidos
       };
 
@@ -785,7 +767,6 @@ function test_SheetsProcessing() {
       const result = lib.normalizeProcessingConfigMap(configMap);
       const normalizedConfig = result["text/csv"];
       
-      // Debería tener valores por defecto para las propiedades missing
       Utils.assertEquals(normalizedConfig.ignoreEmptyRows, true);
       Utils.assertEquals(normalizedConfig.updateExistingRows, false);
       Utils.assertEquals(normalizedConfig.allowFileReprocessing, false);
@@ -800,11 +781,9 @@ function test_SheetsProcessing() {
 
       const result = lib.normalizeProcessingConfigMap(configMap);
       
-      // Verificar que son objetos diferentes
       Utils.assertFalse(result === configMap);
       Utils.assertFalse(result["text/csv"] === originalConfig);
 
-      // Modificar el resultado no debería afectar el original
       result["newKey"] = "test";
       Utils.assertFalse("newKey" in configMap);
       
@@ -841,14 +820,12 @@ function test_SheetsProcessing() {
 
       const result = lib.normalizeProcessingConfigMap(configMap);
       
-      // Debería preservar las referencias a funciones
       Utils.assertEquals(result["text/csv"].searchingFn, customFunction);
       Utils.assertEquals(result["text/csv"].processingFn, customFunction);
       Utils.assertEquals(result["text/csv"].searchingFn(), "custom");
     });
   });
 
-  // Tests para casos edge específicos
   Utils.describe("normalizeProcessingConfigMap - Edge Cases", () => {
     
     Utils.it("maneja objetos con prototipo null como configMap", () => {
@@ -879,7 +856,6 @@ function test_SheetsProcessing() {
         }
       };
 
-      // Agregar propiedad no enumerable (no debería ser procesada)
       Object.defineProperty(configMap, "nonEnumerable", {
         value: { columns: [1], searchingFn: function() {} },
         enumerable: false
@@ -887,7 +863,6 @@ function test_SheetsProcessing() {
 
       const result = lib.normalizeProcessingConfigMap(configMap);
       
-      // Solo debería procesar propiedades enumerables
       Utils.assertEquals(Object.keys(result).length, 1);
       Utils.assertTrue("text/csv" in result);
       Utils.assertFalse("nonEnumerable" in result);
@@ -903,14 +878,12 @@ function test_SheetsProcessing() {
 
       const result = lib.normalizeProcessingConfigMap(configMap);
       
-      // Debería normalizar todas las entradas, incluso las null/undefined
       Utils.assertEquals(Object.keys(result).length, 4);
       Utils.assertTrue("type1" in result);
       Utils.assertTrue("type2" in result);
       Utils.assertTrue("type3" in result);
       Utils.assertTrue("type4" in result);
       
-      // Las configuraciones null/undefined deberían ser normalizadas a valores por defecto
       Utils.assertTrue(result["type2"].hasOwnProperty("columns"));
       Utils.assertTrue(result["type2"].hasOwnProperty("searchingFn"));
       Utils.assertTrue(result["type3"].hasOwnProperty("columns"));
@@ -964,7 +937,7 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result, ",");
     });
 
-    Utils.it("maneja empates correctamente (primer empate en array)", () => {
+    Utils.it("maneja empates correctamente (entonces primero en array)", () => {
       const line = "field1,field2;field3,field4;field5";
       // Conteos: , = 2, ; = 2 - debería preferir ; porque viene primero en el array
       const result = lib.detectCSVSeparator(line);
@@ -997,7 +970,7 @@ function test_SheetsProcessing() {
       const line = "nombre , apellido ; edad , ciudad";
       // Debería contar los separadores correctamente ignorando espacios
       const result = lib.detectCSVSeparator(line);
-      Utils.assertEquals(result, ","); // 2 comas vs 1 punto y coma
+      Utils.assertEquals(result, ",");
     });
 
     Utils.it("funciona con separadores al inicio/final de línea", () => {
@@ -1013,7 +986,7 @@ function test_SheetsProcessing() {
     });
 
     Utils.it("es case sensitive con los separadores", () => {
-      const line = "field1,field2,FIELD3"; // F mayúscula, pero la coma sigue siendo la misma
+      const line = "field1,field2,FIELD3";
       const result = lib.detectCSVSeparator(line);
       Utils.assertEquals(result, ",");
     });
@@ -1030,18 +1003,8 @@ function test_SheetsProcessing() {
       const result = lib.detectCSVSeparator(longLine);
       Utils.assertEquals(result, ",");
     });
-
-    Utils.it("prefiere tabulador sobre otros cuando tiene mayor conteo", () => {
-      const line = "field1\tfield2\tfield3,field4,field5";
-      // (\t) = 2, (,) = 2 - En empates, el primero del array gana
-      // La función usa sort estable, mantiene orden original para empates
-      // El array es [';', ',', '\t', '|'] por lo que gana ,
-      const result = lib.detectCSVSeparator(line);
-      Utils.assertEquals(result, ",");
-    });
   });
 
-  // Tests adicionales para edge cases
   Utils.describe("detectCSVSeparator - Edge Cases", () => {
     
     Utils.it("maneja caracteres especiales regex correctamente", () => {
@@ -1053,7 +1016,6 @@ function test_SheetsProcessing() {
 
     Utils.it("funciona con strings que contienen regex special chars", () => {
       const line = "field1.field2;field3*field4,field5?field6";
-      // . * ? son caracteres normales aquí, no metacaracteres regex
       const result = lib.detectCSVSeparator(line);
       Utils.assertEquals(result, ";"); // ; tiene 1, , tiene 1 - ; gana por orden array
     });
@@ -1061,7 +1023,7 @@ function test_SheetsProcessing() {
     Utils.it("maneja unicode y caracteres especiales", () => {
       const line = "nombreñ,apellidó;edadé,ciudadú";
       const result = lib.detectCSVSeparator(line);
-      Utils.assertEquals(result, ","); // 2 comas vs 1 punto y coma
+      Utils.assertEquals(result, ","); 
     });
 
     Utils.it("funciona con solo un tipo de separador presente", () => {
@@ -1078,13 +1040,11 @@ function test_SheetsProcessing() {
     });
   });
 
-  // Tests para verificar el orden de preferencia
   Utils.describe("detectCSVSeparator - Orden de preferencia", () => {
     
     Utils.it("respeta el orden del array en caso de empate", () => {
       const separators = [';', ',', '\t', '|'];
       
-      // Test con empate entre todos los separadores
       const line = "a;b,c\td|e";
       const result = lib.detectCSVSeparator(line);
       // Todos tienen count = 1, debería preferir ; (primero en array)
@@ -1092,8 +1052,7 @@ function test_SheetsProcessing() {
     });
 
     Utils.it("el orden del array define la prioridad", () => {
-      // Verificar que el orden del array es el esperado
-      const testLine1 = "a;b,c"; // ; = 1, , = 1 - ; debería ganar
+      const testLine1 = "a;b,c"; // ; = 1, , = 1 - ; debería ganar (primero en array)
       const testLine2 = "a,b;c"; // , = 1, ; = 1 - ; debería ganar (primero en array)
       
       Utils.assertEquals(lib.detectCSVSeparator(testLine1), ";");
@@ -1101,10 +1060,10 @@ function test_SheetsProcessing() {
     });
 
     Utils.it("funciona con el orden actual de separators", () => {
-      // Este test verifica que el orden sea: [';', ',', '\t', '|']
-      const line1 = "a;b,c"; // ; primero en array
-      const line2 = "a,b|c"; // , primero en array
-      const line3 = "a\tb|c"; // \t primero en array
+      // Orden: [';', ',', '\t', '|']
+      const line1 = "a;b,c"; 
+      const line2 = "a,b|c"; 
+      const line3 = "a\tb|c"; 
       
       Utils.assertEquals(lib.detectCSVSeparator(line1), ";");
       Utils.assertEquals(lib.detectCSVSeparator(line2), ",");
@@ -1225,7 +1184,7 @@ function test_SheetsProcessing() {
       const line = '"nombre,apellido,edad';
       const result = lib.parseCSVLine(line, ",");
       // Comportamiento esperado de recuperación:
-      // Al no encontrar una comilla de ciere, toma toda la cadena como un solo valor 
+      // Al no encontrar una comilla de cierre, toma toda la cadena como un solo valor 
       Utils.assertEquals(result, ['"nombre,apellido,edad']);
     });
 
@@ -1268,7 +1227,6 @@ function test_SheetsProcessing() {
     });
   });
 
-  // Tests para casos edge complejos
   Utils.describe("parseCSVLine - Casos Complejos", () => {
     
     Utils.it("maneja campos con comillas y separadores mezclados", () => {
@@ -1289,7 +1247,6 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result, [""]);
     });
 
-    // Test para formato válido (número par de comillas)
     Utils.it("maneja múltiples comillas consecutivas - formato válido (par)", () => {
         // 6 comillas dobles: representan "" (dos comillas) dentro de un campo entrecomillado
         const line = '"""""","test"';
@@ -1297,7 +1254,6 @@ function test_SheetsProcessing() {
         Utils.assertEquals(result, ['"', "test"]);
     });
 
-    // Test para formato inválido (número impar de comillas)
     Utils.it("maneja múltiples comillas consecutivas - formato inválido (impar)", () => {
         // 5 comillas dobles: formato inválido pero la función se recupera
         const line = '""""","test"';
@@ -1316,7 +1272,6 @@ function test_SheetsProcessing() {
         Utils.assertEquals(result, ['","test']);
     });
 
-    // Test adicional para verificar consistencia
     Utils.it("maneja diversos casos de comillas consecutivas", () => {
         // 1 comilla
         // Comportamiento esperado de recuperación:
@@ -1405,7 +1360,6 @@ function test_SheetsProcessing() {
     });
   });
 
-  // Tests para rendimiento y grandes volúmenes
   Utils.describe("parseCSVLine - Rendimiento", () => {
     
     Utils.it("maneja líneas largas", () => {
@@ -1431,7 +1385,6 @@ function test_SheetsProcessing() {
     });
   });
 
-  // Tests para verificar el escape de regex
   Utils.describe("parseCSVLine - Escape de Regex", () => {
     
     Utils.it("maneja separadores con caracteres regex especiales", () => {
@@ -1471,7 +1424,7 @@ function test_SheetsProcessing() {
 
       Utils.assertFunctionParams(lib.getSpreadsheetObjectsWithFallback, ["WRONG_ID", null], true, /no es válido/);
 
-      SpreadsheetApp.openById = oldOpenById; // restaurar
+      SpreadsheetApp.openById = oldOpenById; 
     });
     Utils.it("lanza error si sheetName no existe", () => {
       const fakeSheet = { getName: () => "Hoja1" };
@@ -1488,10 +1441,9 @@ function test_SheetsProcessing() {
       Utils.assertFunctionParams(
         lib.getSpreadsheetObjectsWithFallback, ["TEST_ID", "dummy"], true, /Hoja de destino no encontrada/);
 
-      SpreadsheetApp.openById = oldOpenById; // restaurar
+      SpreadsheetApp.openById = oldOpenById; 
     });
     Utils.it("retorna spreadsheet, sheet y file válidos", () => {
-      // Mock SpreadsheetApp
       const fakeSheet1 = { getName: () => "Hoja1" };
       const fakeSheet2 = { getName: () => "Hoja2" };
       const fakeSheets = [fakeSheet1, fakeSheet2];
@@ -1516,8 +1468,8 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result2.sheet.getName(), "Hoja2");
       Utils.assertEquals(result2.file.getName(), "FAKE_SPREADSHEET");
 
-      DriveApp.getFileById = oldGetFileById; // restaurar
-      SpreadsheetApp.openById = oldOpenById; // restaurar
+      DriveApp.getFileById = oldGetFileById; 
+      SpreadsheetApp.openById = oldOpenById; 
     });
   });
 
@@ -1543,7 +1495,7 @@ function test_SheetsProcessing() {
 
       Utils.assertFunctionParams(lib.getLogOptionsWithFallback, [{ logSpreadsheet: fakeSpreadsheet, logSheetName: "dummy" }], true, /Hoja no encontrada/);
 
-      DriveApp.getFileById = oldGetFileById; // restaurar
+      DriveApp.getFileById = oldGetFileById; 
     });
     Utils.it("devuelve opciones predeterminadas", () => {
       const fakeSheet1 = { getName: () => "Hoja1" };
@@ -1569,7 +1521,7 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result2.successMessage, "Éxito");
       Utils.assertEquals(result2.failureMessage, "Error procesando archivo");
 
-      DriveApp.getFileById = oldGetFileById; // restaurar
+      DriveApp.getFileById = oldGetFileById; 
     });
     Utils.it("respeta opciones suministradas", () => {
       const fakeSheet1 = { getName: () => "Hoja1" };
@@ -1606,7 +1558,7 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result2.successMessage, "SUCCESS");
       Utils.assertEquals(result2.failureMessage, "FAILURE");
 
-      DriveApp.getFileById = oldGetFileById; // restaurar
+      DriveApp.getFileById = oldGetFileById; 
     });
   });
 
@@ -1662,9 +1614,9 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result.backupFolder.getId(), "log-folder-id_respaldos");
       Utils.assertFalse(result.keepProcessedInSource);
 
-      Utils.getOrCreateSubfolderFrom = oldGetOrCreate; // restaurar
-      DriveApp.getFolderById = oldGetFolderById; // restaurar
-      DriveApp.getFileById = oldGetFileById; // restaurar
+      Utils.getOrCreateSubfolderFrom = oldGetOrCreate; 
+      DriveApp.getFolderById = oldGetFolderById; 
+      DriveApp.getFileById = oldGetFileById; 
     });
     Utils.it("respeta las opciones suministradas", () => {
       const fakeFolder = {
@@ -1715,9 +1667,9 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result.backupFolder.getId(), "target-folder-id_B");
       Utils.assertTrue(result.keepProcessedInSource);
 
-      Utils.getOrCreateSubfolderFrom = oldGetOrCreate; // restaurar
-      DriveApp.getFolderById = oldGetFolderById; // restaurar
-      DriveApp.getFileById = oldGetFileById; // restaurar
+      Utils.getOrCreateSubfolderFrom = oldGetOrCreate; 
+      DriveApp.getFolderById = oldGetFolderById; 
+      DriveApp.getFileById = oldGetFileById; 
     });
     Utils.it("permisos insuficientes en la carpeta destino -> se crea el respaldo en la de procesamiento", () => {
       const fakeFolder = {
@@ -1768,9 +1720,9 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result.backupFolder.getId(), "processing-folder-id_B");
       Utils.assertTrue(result.keepProcessedInSource);
 
-      Utils.getOrCreateSubfolderFrom = oldGetOrCreate; // restaurar
-      DriveApp.getFolderById = oldGetFolderById; // restaurar
-      DriveApp.getFileById = oldGetFileById; // restaurar
+      Utils.getOrCreateSubfolderFrom = oldGetOrCreate; 
+      DriveApp.getFolderById = oldGetFolderById; 
+      DriveApp.getFileById = oldGetFileById; 
     });
   });
 
@@ -1782,15 +1734,13 @@ function test_SheetsProcessing() {
 
   Utils.describe("processDataPipeline", () => {
     
-    // Configuración base para los tests
     const baseConfig = {
-      columns: [0, 1, 2], // Mapeo simple de columnas
+      columns: [0, 1, 2], 
       searchingFn: () => [],
       ignoreEmptyRows: true,
       updateExistingRows: false
     };
 
-    // Datos de ejemplo
     const sampleData = [
       [1, "Alice", "alice@email.com"],
       [2, "Bob", "bob@email.com"],
@@ -1801,8 +1751,8 @@ function test_SheetsProcessing() {
       const result = lib.processDataPipeline(
         sampleData,
         baseConfig,
-        0, // keyColumnIndex (columna 0 = ID)
-        "integer" // keyColumnType
+        0, 
+        "integer" 
       );
 
       Utils.assertEquals(result.newRows.length, 3);
@@ -1811,7 +1761,7 @@ function test_SheetsProcessing() {
     });
 
     Utils.it("filtra filas existentes cuando se proporciona existingKeys", () => {
-      const existingKeys = new Set([1, 3]); // IDs existentes
+      const existingKeys = new Set([1, 3]); 
 
       const result = lib.processDataPipeline(
         sampleData,
@@ -1846,7 +1796,6 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result.updatedRows.length, 2);
       Utils.assertEquals(result.newRows[0], [2, "Bob", "bob@email.com"]);
       
-      // Verificar que las updatedRows tienen la estructura correcta
       Utils.assertEquals(result.updatedRows[0].key, 1);
       Utils.assertEquals(result.updatedRows[0].row, [1, "Alice", "alice@email.com"]);
     });
@@ -1872,9 +1821,9 @@ function test_SheetsProcessing() {
     Utils.it("filtra filas vacías cuando ignoreEmptyRows es true", () => {
       const dataWithEmptyRows = [
         [1, "Alice", "alice@email.com"],
-        ["", "", ""], // Fila vacía
+        ["", "", ""], 
         [2, "Bob", "bob@email.com"],
-        [null, null, null] // Fila con nulls
+        [null, null, null] 
       ];
 
       const result = lib.processDataPipeline(
@@ -1897,7 +1846,7 @@ function test_SheetsProcessing() {
 
       const dataWithEmptyRows = [
         [1, "Alice", "alice@email.com"],
-        ["", "", ""], // Fila vacía
+        ["", "", ""], 
         [2, "Bob", "bob@email.com"]
       ];
 
@@ -1914,13 +1863,13 @@ function test_SheetsProcessing() {
     Utils.it("maneja mapeo complejo de columnas", () => {
       const configComplexColumns = {
         ...baseConfig,
-        columns: [2, 0, "fixed_value", 1] // Mezcla de índices y valores fijos
+        columns: [2, 0, "fixed_value", 1] 
       };
 
       const result = lib.processDataPipeline(
         sampleData,
         configComplexColumns,
-        1, // keyColumnIndex ahora en posición 1 (que mapea a columna 0 original)
+        1, 
         "integer"
       );
 
@@ -1938,11 +1887,10 @@ function test_SheetsProcessing() {
         dataWithStringNumbers,
         baseConfig,
         0,
-        "integer" // Debería convertir strings a números
+        "integer" 
       );
 
-      // Las keys deberían normalizarse a números
-      const existingKeys = new Set([1]); // Número, no string
+      const existingKeys = new Set([1]); 
       const resultWithFilter = lib.processDataPipeline(
         dataWithStringNumbers,
         baseConfig,
@@ -1961,7 +1909,7 @@ function test_SheetsProcessing() {
         baseConfig,
         0,
         "integer",
-        new Set() // Set vacío
+        new Set() 
       );
 
       Utils.assertEquals(result.newRows.length, 3);
@@ -1974,7 +1922,7 @@ function test_SheetsProcessing() {
         baseConfig,
         0,
         "integer",
-        undefined // existingKeys undefined
+        undefined 
       );
 
       Utils.assertEquals(result.newRows.length, 3);
@@ -1996,32 +1944,31 @@ function test_SheetsProcessing() {
     });
 
     Utils.it("valida parámetros requeridos", () => {
-      // Test de validación de parámetros
       Utils.assertFunctionParams(
         lib.processDataPipeline,
         [null, baseConfig, 0, "integer"],
-        true, // Debería lanzar error
+        true, 
         "'data' no es válido"
       );
 
       Utils.assertFunctionParams(
         lib.processDataPipeline,
         [sampleData, null, 0, "integer"],
-        true, // Debería lanzar error
+        true, 
         "'config' no es válido"
       );
 
       Utils.assertFunctionParams(
         lib.processDataPipeline,
         [sampleData, baseConfig, -1, "integer"],
-        true, // Debería lanzar error
+        true, 
         "'keyColumnIndex' no es válido"
       );
 
       Utils.assertFunctionParams(
         lib.processDataPipeline,
         [sampleData, baseConfig, 0, "number"],
-        true, // Debería lanzar error
+        true, 
         "'keyColumnType' no es válido"
       );
     });
@@ -2033,7 +1980,6 @@ function test_SheetsProcessing() {
         [true, "Boolean key"]
       ];
 
-      // Test con tipo string
       const resultString = lib.processDataPipeline(
         mixedData,
         baseConfig,
@@ -2041,7 +1987,6 @@ function test_SheetsProcessing() {
         "string"
       );
 
-      // Test con tipo boolean
       const resultBoolean = lib.processDataPipeline(
         [mixedData[2]],
         baseConfig,
@@ -2096,7 +2041,6 @@ function test_SheetsProcessing() {
 
   Utils.describe("processGoogleSheetFile", () => {
     
-    // Mock de las clases de Google Apps Script
     function createMockFile(mimeType) {
       return {
         getId: () => "mock-file-id",
@@ -2113,7 +2057,6 @@ function test_SheetsProcessing() {
       };
     }
 
-    // Configuración base
     const baseConfig = {
       columns: [0, 1, 2],
       searchingFn: () => [],
@@ -2121,7 +2064,6 @@ function test_SheetsProcessing() {
       updateExistingRows: false
     };
 
-    // Datos de muestra
     const sampleData = [
       [1, "Alice", "alice@email.com"],
       [2, "Bob", "bob@email.com"],
@@ -2158,11 +2100,9 @@ function test_SheetsProcessing() {
       }
     };
 
-    // Guardar referencia original
     const originalOpenById = SpreadsheetApp.openById;
 
     Utils.it("procesa archivo Google Sheet válido correctamente", () => {
-      // Configurar mocks
       SpreadsheetApp.openById = function(id) {
         Utils.assertEquals(id, "mock-file-id");
         return mockSpreadsheet;
@@ -2180,7 +2120,7 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result.updatedRows.length, 0);
       Utils.assertEquals(result.newRows[0], [1, "Alice", "alice@email.com"]);
 
-      // Restaurar
+      
       if (originalOpenById) SpreadsheetApp.openById = originalOpenById;
     });
 
@@ -2370,7 +2310,6 @@ function test_SheetsProcessing() {
       let firstSheetAccessed = false;
       const mockSpreadsheetFirstSheet = {
         getSheetByName: function(name) {
-          // No debería llamarse cuando no hay sourceSheetName
           throw new Error("getSheetByName no debería ser llamado");
         },
         getSheets: function() {
@@ -2386,7 +2325,7 @@ function test_SheetsProcessing() {
       const mockFile = createMockFile(MimeType.GOOGLE_SHEETS);
       const result = lib.processGoogleSheetFile(
         mockFile,
-        baseConfig, // sin sourceSheetName
+        baseConfig, 
         0,
         "integer"
       );
@@ -2405,7 +2344,7 @@ function test_SheetsProcessing() {
       const configWithProcessing = {
         ...baseConfig,
         processingFn: function(data) {
-          return data.filter(row => row[0] !== 2); // Filtrar Bob
+          return data.filter(row => row[0] !== 2); 
         }
       };
 
@@ -2425,7 +2364,6 @@ function test_SheetsProcessing() {
     });
   });
 
-  // Tests adicionales para edge cases
   Utils.describe("processGoogleSheetFile - Edge Cases", () => {
     
     function createMockFile(mimeType) {
@@ -2446,9 +2384,9 @@ function test_SheetsProcessing() {
 
     const mockSheetWithEmptyRows = createMockSheet([
       [1, "Alice", "alice@email.com"],
-      ["", "", ""], // Fila vacía
+      ["", "", ""], 
       [2, "Bob", "bob@email.com"],
-      [null, null, null] // Fila con nulls
+      [null, null, null] 
     ]);
 
     const mockSpreadsheet = {
@@ -2521,7 +2459,6 @@ function test_SheetsProcessing() {
 
   Utils.describe("processXlsxFile", () => {
     
-    // Mock de las clases de Google Apps Script
     function createMockFile(mimeType, id) {
       return {
         getId: () => id || "mock-xlsx-file-id",
@@ -2539,7 +2476,6 @@ function test_SheetsProcessing() {
       };
     }
 
-    // Configuración base
     const baseConfig = {
       columns: [0, 1, 2],
       searchingFn: () => [],
@@ -2547,7 +2483,6 @@ function test_SheetsProcessing() {
       updateExistingRows: false
     };
 
-    // Datos de muestra
     const sampleData = [
       [1, "Alice", "alice@email.com"],
       [2, "Bob", "bob@email.com"],
@@ -2568,13 +2503,11 @@ function test_SheetsProcessing() {
 
     const mockConvertedFile = createMockFile(MimeType.GOOGLE_SHEETS, "converted-file-id");
 
-    // Guardar referencias originales
     const originalOpenById = SpreadsheetApp.openById;
     const originalConvertFile = Utils.convertFileToGoogleSheet;
     const originalFlush = SpreadsheetApp.flush;
 
     Utils.it("procesa archivo XLSX válido correctamente", () => {
-      // Configurar mocks
       SpreadsheetApp.openById = function(id) {
         Utils.assertEquals(id, "converted-file-id");
         return mockSpreadsheet;
@@ -2585,7 +2518,7 @@ function test_SheetsProcessing() {
         return mockConvertedFile;
       };
       
-      SpreadsheetApp.flush = function() {}; // Mock vacío
+      SpreadsheetApp.flush = function() {}; 
 
       const mockFile = createMockFile(MimeType.MICROSOFT_EXCEL);
       const result = lib.processXlsxFile(
@@ -2599,7 +2532,7 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result.updatedRows.length, 0);
       Utils.assertEquals(result.newRows[0], [1, "Alice", "alice@email.com"]);
 
-      // Restaurar
+      
       if (originalOpenById) SpreadsheetApp.openById = originalOpenById;
       if (originalConvertFile) Utils.convertFileToGoogleSheet = originalConvertFile;
       if (originalFlush) SpreadsheetApp.flush = originalFlush;
@@ -2619,7 +2552,6 @@ function test_SheetsProcessing() {
     Utils.it("lanza error para parámetros inválidos", () => {
       const mockFile = createMockFile(MimeType.MICROSOFT_EXCEL);
       
-      // Test config inválido
       Utils.assertFunctionParams(
         lib.processXlsxFile,
         [mockFile, null, 0, "integer"],
@@ -2627,7 +2559,6 @@ function test_SheetsProcessing() {
         "El parámetro 'config' no es válido"
       );
       
-      // Test keyColumnIndex inválido
       Utils.assertFunctionParams(
         lib.processXlsxFile,
         [mockFile, baseConfig, -1, "integer"],
@@ -2635,7 +2566,6 @@ function test_SheetsProcessing() {
         "El parámetro 'keyColumnIndex' no es válido"
       );
       
-      // Test keyColumnType inválido
       Utils.assertFunctionParams(
         lib.processXlsxFile,
         [mockFile, baseConfig, 0, "invalid-type"],
@@ -2696,7 +2626,7 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result.newRows.length, 3);
       Utils.assertEquals(result.newRows[0], [1, "Alice", "alice@email.com"]);
 
-      // Restaurar
+      
       if (originalOpenById) SpreadsheetApp.openById = originalOpenById;
       if (originalConvertFile) Utils.convertFileToGoogleSheet = originalConvertFile;
       if (originalFlush) SpreadsheetApp.flush = originalFlush;
@@ -2726,7 +2656,7 @@ function test_SheetsProcessing() {
         "No se encontró la hoja"
       );
 
-      // Restaurar
+      
       if (originalOpenById) SpreadsheetApp.openById = originalOpenById;
       if (originalConvertFile) Utils.convertFileToGoogleSheet = originalConvertFile;
       if (originalFlush) SpreadsheetApp.flush = originalFlush;
@@ -2798,7 +2728,7 @@ function test_SheetsProcessing() {
       Utils.assertTrue(flushed, "Debería llamar a SpreadsheetApp.flush()");
       Utils.assertTrue(trashed, "Debería llamar a setTrashed(true)");
 
-      // Restaurar
+      
       if (originalOpenById) SpreadsheetApp.openById = originalOpenById;
       if (originalConvertFile) Utils.convertFileToGoogleSheet = originalConvertFile;
       if (originalFlush) SpreadsheetApp.flush = originalFlush;
@@ -2821,7 +2751,6 @@ function test_SheetsProcessing() {
 
       const mockFile = createMockFile(MimeType.MICROSOFT_EXCEL);
       
-      // Aunque haya errores en la limpieza, la función debería completarse
       const result = lib.processXlsxFile(
         mockFile,
         baseConfig,
@@ -2831,7 +2760,7 @@ function test_SheetsProcessing() {
 
       Utils.assertEquals(result.newRows.length, 3);
 
-      // Restaurar
+      
       if (originalOpenById) SpreadsheetApp.openById = originalOpenById;
       if (originalConvertFile) Utils.convertFileToGoogleSheet = originalConvertFile;
       if (originalFlush) SpreadsheetApp.flush = originalFlush;
@@ -2862,14 +2791,13 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result.newRows.length, 1);
       Utils.assertEquals(result.newRows[0], [2, "Bob", "bob@email.com"]);
 
-      // Restaurar
+      
       if (originalOpenById) SpreadsheetApp.openById = originalOpenById;
       if (originalConvertFile) Utils.convertFileToGoogleSheet = originalConvertFile;
       if (originalFlush) SpreadsheetApp.flush = originalFlush;
     });
   });
 
-  // Tests adicionales para edge cases
   Utils.describe("processXlsxFile - Edge Cases", () => {
     
     function createMockFile(mimeType) {
@@ -2890,9 +2818,9 @@ function test_SheetsProcessing() {
 
     const mockSheetWithEmptyRows = createMockSheet([
       [1, "Alice", "alice@email.com"],
-      ["", "", ""], // Fila vacía
+      ["", "", ""], 
       [2, "Bob", "bob@email.com"],
-      [null, null, null] // Fila con nulls
+      [null, null, null] 
     ]);
 
     const mockSpreadsheet = {
@@ -2940,7 +2868,7 @@ function test_SheetsProcessing() {
 
       Utils.assertEquals(result.newRows.length, 2);
 
-      // Restaurar
+      
       if (originalOpenById) SpreadsheetApp.openById = originalOpenById;
       if (originalConvertFile) Utils.convertFileToGoogleSheet = originalConvertFile;
       if (originalFlush) SpreadsheetApp.flush = originalFlush;
@@ -2955,7 +2883,6 @@ function test_SheetsProcessing() {
 
   Utils.describe("processCsvFile", () => {
     
-    // Mock de las clases de Google Apps Script
     function createMockFile(mimeType, contents) {
       return {
         getId: () => "mock-csv-file-id",
@@ -2970,7 +2897,6 @@ function test_SheetsProcessing() {
       };
     }
 
-    // Configuración base
     const baseConfig = {
       columns: [0, 1, 2],
       searchingFn: () => [],
@@ -2979,7 +2905,6 @@ function test_SheetsProcessing() {
     };
 
     Utils.it("procesa archivo CSV válido correctamente", () => {
-      // Configurar mocks
       const csvContents = `1,Alice,alice@email.com\n2,Bob,bob@email.com\n3,Charlie,charlie@email.com`;
       const mockFile = createMockFile(MimeType.CSV, csvContents);
       
@@ -3009,7 +2934,6 @@ function test_SheetsProcessing() {
     Utils.it("lanza error para parámetros inválidos", () => {
       const mockFile = createMockFile(MimeType.CSV, "content");
       
-      // Test config inválido
       Utils.assertFunctionParams(
         lib.processCsvFile,
         [mockFile, null, 0, "integer"],
@@ -3017,7 +2941,6 @@ function test_SheetsProcessing() {
         "El parámetro 'config' no es válido"
       );
       
-      // Test keyColumnIndex inválido
       Utils.assertFunctionParams(
         lib.processCsvFile,
         [mockFile, baseConfig, -1, "integer"],
@@ -3025,7 +2948,6 @@ function test_SheetsProcessing() {
         "El parámetro 'keyColumnIndex' no es válido"
       );
       
-      // Test keyColumnType inválido
       Utils.assertFunctionParams(
         lib.processCsvFile,
         [mockFile, baseConfig, 0, "invalid-type"],
@@ -3110,18 +3032,6 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result.newRows[0], ["2", "Bob", "bob@email.com"]);
     });
 
-    // Utils.it("maneja errores en parseCSVLine", () => {
-    //   const csvContents = "1,Alice,alice@email.com\n2,Bob,bob@email.com";
-    //   const mockFile = createMockFile(MimeType.CSV, csvContents);
-
-    //   Utils.assertFunctionParams(
-    //     lib.processCsvFile,
-    //     [mockFile, baseConfig, 0, "integer"],
-    //     true,
-    //     "Error procesando un archivo CSV"
-    //   );
-    // });
-
     Utils.it("maneja CSV con comillas y caracteres especiales", () => {
       const csvContents = '1,"Alice, Smith","alice@email.com"\n2,"Bob""Brown","bob@email.com"';
       const mockFile = createMockFile(MimeType.CSV, csvContents);
@@ -3155,7 +3065,6 @@ function test_SheetsProcessing() {
     });
   });
 
-  // Tests adicionales para edge cases
   Utils.describe("processCsvFile - Edge Cases", () => {
     
     function createMockFile(mimeType, contents) {
@@ -3255,7 +3164,6 @@ function test_SheetsProcessing() {
       };
     }
 
-    // Configuración base
     const baseConfig = {
       columns: [0, 1, 2],
       searchingFn: function(mimeType) {
@@ -3266,7 +3174,7 @@ function test_SheetsProcessing() {
       },
       ignoreEmptyRows: true,
       updateExistingRows: false,
-      allowFileReprocessing: true // Permitir reprocesamiento para tests
+      allowFileReprocessing: true 
     };
 
     const configs = {
@@ -3277,11 +3185,9 @@ function test_SheetsProcessing() {
       logColumnTitles: ["Fecha", "Archivo", "Resumen", "Estado"],
       successMessage: "Éxito",
       failureMessage: "Error",
-      // Opciones que eviten operaciones de folder complejas
-      keepProcessedInSource: true // No mover archivos
+      keepProcessedInSource: true 
     };
 
-    // Guardar referencias originales que SÍ podemos mockear
     const oldOpenById = SpreadsheetApp.openById;
     const oldGetFileById = DriveApp.getFileById;
     const oldGetFolderById = DriveApp.getFolderById;
@@ -3294,7 +3200,6 @@ function test_SheetsProcessing() {
     const originalSortSheet = Utils.sortSheet;
     const originalGetNormalizer = Utils.getNormalizer;
     const originalExecutionController = EC.ExecutionController;
-    const originalProcessors = processors;
 
     const mockContext = createMockContext();
     const mockProcessingFolder = createMockFolder("processing-folder-id", "processing-folder", null);
@@ -3503,11 +3408,9 @@ function test_SheetsProcessing() {
     });
 
     Utils.it("maneja configs vacías o inválidas", () => {
-      // Mock funciones que se llamarán después de las validaciones iniciales
       Utils.backupFileTo = function() {};
       Utils.getUniqueValuesFromColumn = function() { return new Set(); };
       
-      // Test con configs vacío
       const resultEmptyConfigs = lib.mergeSheetsDataTo(
         mockContext, 
         { 
@@ -3517,7 +3420,7 @@ function test_SheetsProcessing() {
           keyColumnIndex: 0, 
           keyColumnType: "string",
         },
-        {}, // configs vacío
+        {}, 
         { ...options, logSpreadsheet: mockLogSpreadsheet, logSheetName: "Hoja1" }
       );
       
@@ -3525,7 +3428,6 @@ function test_SheetsProcessing() {
       Utils.assertEquals(resultEmptyConfigs.added, 0);
       Utils.assertEquals(resultEmptyConfigs.updated, 0);
 
-      // Test con configs null
       const resultNullConfigs = lib.mergeSheetsDataTo(
         mockContext,
         { 
@@ -3535,7 +3437,7 @@ function test_SheetsProcessing() {
           keyColumnIndex: 0, 
           keyColumnType: "string",
         },
-        null, // configs nulo
+        null, 
         { ...options, logSpreadsheet: mockLogSpreadsheet, logSheetName: "Hoja1" }
       );
       
@@ -3543,13 +3445,12 @@ function test_SheetsProcessing() {
       Utils.assertEquals(resultNullConfigs.added, 0);
       Utils.assertEquals(resultNullConfigs.updated, 0);
 
-      // Restaurar
+      
       if (originalBackupFileTo) Utils.backupFileTo = originalBackupFileTo;
       if (originalGetUniqueValues) Utils.getUniqueValuesFromColumn = originalGetUniqueValues;
     });
 
     Utils.it("ejecuta el loop de procesamiento correctamente", () => {
-      // Mock de EC.ExecutionController.runLoop
       let runLoopCalled = false;
       EC.ExecutionController = {
         runLoop: function(ctx, files, processor) {
@@ -3566,7 +3467,6 @@ function test_SheetsProcessing() {
         }
       };
 
-      // Mock otras funciones utilitarias
       Utils.backupFileTo = function() {};
       Utils.getUniqueValuesFromColumn = function() { return new Set(); };
       Utils.updateRowsInSheet = function() { return 0; };
@@ -3591,7 +3491,7 @@ function test_SheetsProcessing() {
       Utils.assertEquals(result.added, 1);
       Utils.assertEquals(result.updated, 0);
 
-      // Restaurar
+      
       if (originalExecutionController) EC.ExecutionController = originalExecutionController;
       if (originalBackupFileTo) Utils.backupFileTo = originalBackupFileTo;
       if (originalGetUniqueValues) Utils.getUniqueValuesFromColumn = originalGetUniqueValues;
@@ -3616,7 +3516,6 @@ function test_SheetsProcessing() {
         }
       };
 
-      // Mock funciones de log
       let logEntries = [];
       Utils.appendRowsToSheet = function(sheet, rows, headers) {
         logEntries = logEntries.concat(rows);
@@ -3644,7 +3543,7 @@ function test_SheetsProcessing() {
       Utils.assertEquals(logEntries.length, 1);
       Utils.assertEquals(logEntries[0][3], "Error de procesamiento");
 
-      // Restaurar
+      
       if (originalExecutionController) EC.ExecutionController = originalExecutionController;
       if (originalAppendRows) Utils.appendRowsToSheet = originalAppendRows;
       if (originalBackupFileTo) Utils.backupFileTo = originalBackupFileTo;
@@ -3704,7 +3603,7 @@ function test_SheetsProcessing() {
       Utils.assertTrue(processedTypes.has(MimeType.CSV));
       Utils.assertTrue(processedTypes.has(MimeType.GOOGLE_SHEETS));
 
-      // Restaurar
+      
       if (originalExecutionController) EC.ExecutionController = originalExecutionController;
       if (originalBackupFileTo) Utils.backupFileTo = originalBackupFileTo;
       if (originalGetUniqueValues) Utils.getUniqueValuesFromColumn = originalGetUniqueValues;
@@ -3727,7 +3626,6 @@ function test_SheetsProcessing() {
       Utils.getUniqueValuesFromColumn = function() { return new Set(); };
       Utils.appendRowsToSheet = function() {};
 
-      // Debería manejar graciosamente el stoppedEarly
       const result = lib.mergeSheetsDataTo(
         mockContext,
         { 
@@ -3743,7 +3641,7 @@ function test_SheetsProcessing() {
 
       Utils.assertEquals(result.processed, 1);
 
-      // Restaurar
+      
       if (originalExecutionController) EC.ExecutionController = originalExecutionController;
       if (originalBackupFileTo) Utils.backupFileTo = originalBackupFileTo;
       if (originalGetUniqueValues) Utils.getUniqueValuesFromColumn = originalGetUniqueValues;
@@ -3753,7 +3651,6 @@ function test_SheetsProcessing() {
     Utils.it("utiliza correctamente los normalizadores de keys", () => {
       const mockContext = { shouldStop: false, remainingTime: () => 300000 };
       
-      // Mock execution controller
       EC.ExecutionController = {
         runLoop: function(ctx, files, processor) {
           return {
@@ -3765,7 +3662,6 @@ function test_SheetsProcessing() {
         }
       };
 
-      // Mock getNormalizer para testear diferentes tipos
       let normalizerType = "";
       Utils.getNormalizer = function(type) {
         normalizerType = type;
@@ -3799,7 +3695,6 @@ function test_SheetsProcessing() {
         }
       };
 
-      // Test con tipo number
       lib.mergeSheetsDataTo(
         mockContext,
         { 
@@ -3815,7 +3710,7 @@ function test_SheetsProcessing() {
 
       Utils.assertEquals(normalizerType, "string");
 
-      // Restaurar
+      
       if (originalExecutionController) EC.ExecutionController = originalExecutionController;
       if (originalGetNormalizer) Utils.getNormalizer = originalGetNormalizer;
       if (originalBackupFileTo) Utils.backupFileTo = originalBackupFileTo;
@@ -3823,7 +3718,7 @@ function test_SheetsProcessing() {
       if (originalAppendRows) Utils.appendRowsToSheet = originalAppendRows;
     });
 
-    // Restaurar
+    
     if (oldOpenById) SpreadsheetApp.openById = oldOpenById;
     if (oldGetFileById) DriveApp.getFileById = oldGetFileById;
     if (oldGetFolderById) DriveApp.getFolderById = oldGetFolderById;
